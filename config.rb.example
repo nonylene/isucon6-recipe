@@ -1,2 +1,5 @@
 # set unix password hash
 PASSWORD=""
+# "#" must be escaped (e.g. '\#general,\#random')
+SLACK_CHANNELS=""
+SLACK_TOKEN=""

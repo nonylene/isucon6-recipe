@@ -1,0 +1,23 @@
+#!/bin/bash
+
+date_now=`date "+%Y%m%d-%H%M%S"`
+
+SLOW_LOG_FILE="/var/log/mysql/mysql-slow.log"
+SLOW_DUMPED_FILE="/var/log/mysql/slow-query/slow.$date_now.log"
+if [ -f $SLOW_LOG_FILE ]; then
+    pt-query-digest $SLOW_LOG_FILE > $SLOW_DUMPED_FILE
+    mv $SLOW_LOG_FILE /var/log/mysql/old/mysqld-slow.$date_now.log
+    mysqladmin flush-logs
+    curl -F file=@$SLOW_DUMPED_FILE -F channels=<%= @slack_channels %> -F token=<%= @slack_token %> https://slack.com/api/files.upload
+else
+    echo "$SLOW_LOG_FILE not found."
+fi
+
+# NGINX_LOG_FILE="/var/log/nginx/access.log"
+# if [ -f $NGINX_LOG_FILE ]; then
+#     cp $NGINX_LOG_FILE /var/log/nginx/old/access.$date_now.log
+#     # truncate file
+#     cat /dev/null > $NGINX_LOG_FILE
+# else
+#     echo "$NGINX_LOG_FILE not found."
+# fi
