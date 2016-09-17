@@ -48,8 +48,20 @@ end
 
 %w(zsh tmux git tig vim p7zip-full).each {|pack| package pack}
 
-
 # dumps
+%w(perl libdbi-perl libdbd-mysql-perl libterm-readkey-perl libio-socket-ssl-perl libgdbm3 libnet-ssleay-perl).each {|pack| package pack}
+
+percona_deb_file = "/tmp/percona.deb"
+
+execute "get percona_deb_file" do
+  command "curl https://www.percona.com/downloads/percona-toolkit/2.2.17/deb/percona-toolkit_2.2.17-1_all.deb > #{percona_deb_file}"
+  not_if "type pt-query-digest"
+end
+
+execute "dpkg -i #{percona_deb_file}" do
+  not_if "type pt-query-digest"
+end
+
 directory "/opt/bin" do
   owner "root"
   group "root"
