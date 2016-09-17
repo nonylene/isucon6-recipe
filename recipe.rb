@@ -1,30 +1,31 @@
 require "./config.rb"
 
 define :setup_user, user_name: nil, key_source: nil do
-  p = params
+  define_params = params
 
-  user p[:user_name] do
+  user define_params[:user_name] do
     password PASSWORD
     create_home true
     shell "/bin/bash"
   end
 
-  directory "/home/#{p[:user_name]}/.ssh" do
-    owner p[:user_name]
-    group p[:user_name]
+  directory "/home/#{define_params[:user_name]}/.ssh" do
+    owner define_params[:user_name]
+    group define_params[:user_name]
     mode  "700"
   end
 
-  remote_file "/home/#{p[:user_name]}/.ssh/authorized_keys" do
-    source p[:key_source]
-    owner p[:user_name]
-    group p[:user_name]
+  remote_file "/home/#{define_params[:user_name]}/.ssh/authorized_keys" do
+    source define_params[:key_source]
+    owner define_params[:user_name]
+    group define_params[:user_name]
     mode  "600"
   end
 end
 
-users = %w(nonylene)
+users = %w(nonylene tyage lastcat)
 
+# user create and put keys
 users.each do |user|
   setup_user 'create user' do
     user_name user
@@ -32,10 +33,13 @@ users.each do |user|
   end
 end
 
-template "/etc/sudoers.d/neko-sudoers.conf" do
-  source "templates/neko-sudoers.conf.erb"
+# sudoers
+template "/etc/sudoers.d/neko-sudoers" do
+  source "templates/neko-sudoers.erb"
   mode   "440"
   owner  "root"
   group  "root"
   variables(users: users)
 end
+
+%w(zsh tmux git tig vim p7zip-full).each {|pack| package pack}
