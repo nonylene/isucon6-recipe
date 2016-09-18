@@ -10,7 +10,7 @@ define :setup_user, user_name: nil, key_source: nil do
 
   user define_params[:user_name] do
     shell "/bin/bash"
-    only_if "bash -c '[[ `getent passwd #{define_params[:user_name]}` == */bin/sh* ]]'"
+    not_if "bash -c '[[ `getent passwd #{define_params[:user_name]}` == */bin/* ]]'"
   end
 
   directory "/home/#{define_params[:user_name]}/.ssh" do
