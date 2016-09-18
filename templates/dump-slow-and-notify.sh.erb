@@ -1,5 +1,19 @@
 #!/bin/bash
 
+while getopts nh OPT
+do
+    case $OPT in
+        n)  FLAG_N=1
+            ;;
+        h)  echo "-n: without paste to slack"
+            exit 1
+            ;;
+        \?)  echo "-n: without paste to slack"
+            exit 1
+            ;;
+    esac
+done
+
 date_now=`date "+%Y%m%d-%H%M%S"`
 
 SLOW_LOG_FILE="/var/log/mysql/mysql-slow.log"
@@ -8,16 +22,18 @@ if [ -f $SLOW_LOG_FILE ]; then
     pt-query-digest $SLOW_LOG_FILE > $SLOW_DUMPED_FILE
     mv $SLOW_LOG_FILE /var/log/mysql/old/mysqld-slow.$date_now.log
     mysqladmin flush-logs
-    curl -F file=@$SLOW_DUMPED_FILE -F channels=<%= @slack_channels %> -F token=<%= @slack_token %> https://slack.com/api/files.upload
+    if [ FLAG_N != 1 ]; then
+        curl -F file=@$SLOW_DUMPED_FILE -F channels=<%= @slack_channels %> -F token=<%= @slack_token %> https://slack.com/api/files.upload
+    fi
 else
     echo "$SLOW_LOG_FILE not found."
 fi
 
-# NGINX_LOG_FILE="/var/log/nginx/access.log"
-# if [ -f $NGINX_LOG_FILE ]; then
-#     cp $NGINX_LOG_FILE /var/log/nginx/old/access.$date_now.log
-#     # truncate file
-#     cat /dev/null > $NGINX_LOG_FILE
-# else
-#     echo "$NGINX_LOG_FILE not found."
-# fi
+NGINX_LOG_FILE="/var/log/nginx/access.log"
+if [ -f $NGINX_LOG_FILE ]; then
+    cp $NGINX_LOG_FILE /var/log/nginx/old/access.$date_now.log
+    # truncate file
+    cat /dev/null > $NGINX_LOG_FILE
+else
+    echo "$NGINX_LOG_FILE not found."
+fi
