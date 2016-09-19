@@ -48,6 +48,15 @@ end
 
 %w(zsh tmux git tig vim p7zip-full).each {|pack| package pack}
 
+# symlink
+
+remote_file "/opt/symlink.sh" do
+  source "files/symlink.sh"
+  owner "root"
+  group "root"
+  mode  "777"
+end
+
 # dumps
 %w(perl libdbi-perl libdbd-mysql-perl libterm-readkey-perl libio-socket-ssl-perl libgdbm3 libnet-ssleay-perl).each {|pack| package pack}
 
@@ -60,6 +69,12 @@ end
 
 execute "dpkg -i #{percona_deb_file}" do
   not_if "type pt-query-digest"
+end
+
+directory "/opt" do
+  owner "root"
+  group "root"
+  mode  "777"
 end
 
 directory "/opt/bin" do
